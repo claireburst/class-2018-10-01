@@ -8,10 +8,20 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(tidyverse)
+raw <- read_csv("https://pollofpolls.eu/get/polls/IT-parliament/format/csv", guess_max = 3000) %>%
+  mutate(sd = parse_number(sd))
 ```
 
 ```{r, message=FALSE}
-raw <- read_csv("polls_IT-parliament_2018-10-01.csv")
+good_firms <- raw %>%
+  count(firm) %>%
+  filter(nn > 100)
+
+raw %>%
+  filter(firm %in% good_firms$firm) %>%
+  select(date, firm, n, LN, M5S, PD, FdI) %>%
+  gather(key = "party", value = "poll", LN, M5S, PD, FdI) %>%
+  ggplot(aes(x = date, y = poll, color = party)) + geom_smooth()
 ```
 
 Purpose of this document is to  show polling results in Italy.
